@@ -18,7 +18,9 @@
 
 ;; list of API scopes requested, e.g. https://developers.google.com/admin-sdk/directory/v1/guides/authorizing
 (def scopes ["https://www.googleapis.com/auth/admin.directory.user"
-             "https://www.googleapis.com/auth/admin.directory.group"])
+             "https://www.googleapis.com/auth/admin.directory.group"
+             "https://www.googleapis.com/auth/compute"
+             "https://www.googleapis.com/auth/cloud-platform"])
 
 (defn create-claim [creds & [{:keys [sub] :as opts}]]
   (let [claim (merge {:iss (:client_email creds)
@@ -45,3 +47,29 @@
   (http/request (-> request
                     (assoc-in [:headers "Authorization"] (str "Bearer " token))
                     (assoc :as :json))))
+
+
+;; Run all the above - Tony's toy project starts here
+(def bearer-token (request-token (load-creds "/Users/tsz/Downloads/bns-test-202220-4071f06c91e2.json")))
+
+; gcloud compute instances list
+(api-req {:method "GET" :url "https://www.googleapis.com/compute/v1/projects/bns-test-202220/zones/us-east4-a/instances"} bearer-token)
+
+
+; gcloud compute instances stop
+(api-req {:method "POST" :url "https://www.googleapis.com/compute/v1/projects/bns-test-202220/zones/us-east4-a/instances/instance-tony-1/stop" :headers {"Content-Length" 0}} bearer-token)
+
+; gcloud compute instances create
+
+
+; test
+(client/post "http://example.com/api"
+             {:basic-auth ["user" "pass"]
+              :body "{\"json\": \"input\"}"
+              :headers {"X-Api-Version" "2"}
+              :content-type :json
+              :socket-timeout 1000  ;; in milliseconds
+              :conn-timeout 1000    ;; in milliseconds
+              :accept :json})
+
+
